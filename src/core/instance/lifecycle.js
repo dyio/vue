@@ -1,5 +1,4 @@
 /* @flow */
-
 import config from '../config'
 import Watcher from '../observer/watcher'
 import { mark, measure } from '../util/perf'
@@ -145,6 +144,7 @@ export function mountComponent (
 ): Component {
   vm.$el = el
   if (!vm.$options.render) {
+    // 如果现在还没有render的话并且是runtime compile模式的话，就代表着el和template都是空的 将创建空虚拟节点的方法赋给render，如果非生产环境就报错
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
@@ -164,10 +164,13 @@ export function mountComponent (
       }
     }
   }
+
+  // 调用beforeMount的Hook
   callHook(vm, 'beforeMount')
 
   let updateComponent
-  /* istanbul ignore if */
+/* istanbul ignore if */
+  // 如果不是生产环境并且config有performance属性
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
@@ -187,6 +190,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      //  _render生成虚拟DOM，_update更新DOM
       vm._update(vm._render(), hydrating)
     }
   }
@@ -195,7 +199,8 @@ export function mountComponent (
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
   new Watcher(vm, updateComponent, noop, {
-    before () {
+    before() {
+      // 如果vm已经挂载并且没有被销毁，就调用beforeUpdate的hook
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
@@ -205,6 +210,7 @@ export function mountComponent (
 
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
+  // 如果vm没有父节点，就表明是根节点，调用mounted的hook
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')
@@ -329,6 +335,7 @@ export function callHook (vm: Component, hook: string) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // 如果vm有生命周期钩子事件，就触发该事件
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

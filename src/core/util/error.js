@@ -34,7 +34,9 @@ export function invokeWithErrorHandling (
 ) {
   let res
   try {
+    // 在vm上执行handler，并将执行的返回值赋值给res
     res = args ? handler.apply(context, args) : handler.call(context)
+    // 返回的res是个promise的resolve并且同时拥有then方法和catch方法，就执行catch方法
     if (isPromise(res)) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
     }

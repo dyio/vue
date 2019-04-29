@@ -57,6 +57,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // compile
+    // 将模板进行编译、标记静态节点和转换，最终返回ast、render字符串和staticRenderFns字符串
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -78,6 +79,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
           )
         }
       }
+      // 依次执行tip
       if (compiled.tips && compiled.tips.length) {
         if (options.outputSourceRange) {
           compiled.tips.forEach(e => tip(e.msg, vm))
@@ -90,6 +92,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     // turn code into functions
     const res = {}
     const fnGenErrors = []
+    // 将render或者staticRenderFns 直接new Function()转换成function，如果转换失败，就将错误放入fnGenErrors
     res.render = createFunction(compiled.render, fnGenErrors)
     res.staticRenderFns = compiled.staticRenderFns.map(code => {
       return createFunction(code, fnGenErrors)
@@ -109,6 +112,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
+    // 返回render function和staticRenderFns function，并且存入cache中，方便下次使用时直接取出，不用再次重新编译
     return (cache[key] = res)
   }
 }

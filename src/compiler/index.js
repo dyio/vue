@@ -12,10 +12,13 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
 ): CompiledResult {
+  // 解析template为ast
   const ast = parse(template.trim(), options)
   if (options.optimize !== false) {
+    // 标记静态节点
     optimize(ast, options)
   }
+  // AST转换成render function,最后返回的是render字符串和staticRenderFns字符串
   const code = generate(ast, options)
   return {
     ast,
