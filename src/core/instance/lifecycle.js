@@ -59,19 +59,26 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
+    
+    // 二次更新的时候   会有相关的vnode挂载在vm的  _vnode属性上
     const prevVnode = vm._vnode
+
+    // 设定当前的  vm   patch vnode 过程中会使用到
     const restoreActiveInstance = setActiveInstance(vm)
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // initial render 初次渲染  传入  $el
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // updates  二次渲染
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
+
+    // 恢复上次的  instance
     restoreActiveInstance()
+
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null
@@ -79,7 +86,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm.$el) {
       vm.$el.__vue__ = vm
     }
-    // if parent is an HOC, update its $el as well
+    // if parent is an HOC, update its $el as well  
+    // 高阶组件 参考  https://blog.csdn.net/qq_34255080/article/details/86235140
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }

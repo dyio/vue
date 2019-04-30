@@ -23,10 +23,14 @@ export function initMixin (Vue: Class<Component>) {
     if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
       startTag = `vue-perf-start:${vm._uid}`
       endTag = `vue-perf-end:${vm._uid}`
-      mark(startTag)
+
+      // 本质是  window.performance.mark() 用于测量性能 时间
+      // 详细查看  https://www.cnblogs.com/zhuyang/p/4789020.html
+      mark(startTag)  
     }
 
     // a flag to avoid this being observed
+    // why ???
     vm._isVue = true
     // merge options
     if (options && options._isComponent) {
